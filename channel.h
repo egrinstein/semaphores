@@ -1,7 +1,4 @@
-#ifndef _CHANNEL.H
-#define _CHANNEL.H
 
-#include <semaphore.h>
 #include <stdlib.h>
 
 typedef struct synch synch_t;
@@ -18,5 +15,5 @@ synch_t* create_new_s(synch_t* h);
 int send(synch_t* h, int* mess);
 
 int recv(synch_t* h, int* mess);
-#endif
+
 
