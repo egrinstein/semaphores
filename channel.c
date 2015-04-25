@@ -42,14 +42,14 @@ int asend(asynch_t* h, int* mess){
 
 int arecv(asynch_t* h, int* mess){
     int val;
-	sem_wait(&(h->read_lock));
-	pthread_mutex_lock( &(h->buffer_lock) );
+    sem_wait(&(h->read_lock));
+    pthread_mutex_lock( &(h->buffer_lock) );
  	
-        sem_getvalue( &(h->read_lock), &val);
-        *mess = h->buffer[val];
+    sem_getvalue( &(h->read_lock), &val);
+    *mess = h->buffer[val];
 
-	pthread_mutex_unlock( &(h->buffer_lock) );
-	sem_post( &(h->write_lock) );
+    pthread_mutex_unlock( &(h->buffer_lock) );
+    sem_post( &(h->write_lock) );
 }
 
 synch_t* create_new_s(synch_t* h){
