@@ -56,8 +56,7 @@ void *Consumer(void *arg)
 
 int main()
 {
-    pthread_t *threads = (pthread_t*)malloc((PRODS+CONS)*sizeof(pthread_t));
-    args **thread_args = malloc((PRODS+CONS)*sizeof(args *));
+    pthread_t* threads = (pthread_t*)malloc((PRODS+CONS)*sizeof(pthread_t));
     int index;
     asynch_t * shared ; 
     shared = create_new_a(shared,BUFF_SIZE);
@@ -67,7 +66,6 @@ int main()
        args* arg = malloc(sizeof(args)); 
        arg->item = index;
        arg->shared = shared;
-       thread_args[index] = arg ;
        pthread_create(&threads[index], NULL, Producer, arg);
     }
     for (index = 0; index < CONS; index++)
@@ -75,15 +73,13 @@ int main()
        args* arg = malloc(sizeof(args)); 
        arg->item = index;
        arg->shared = shared;
-       thread_args[index+PRODS] = arg ;
        pthread_create(&threads[index+PRODS], NULL, Consumer, arg);
     }
     for (index = 0; index < PRODS+CONS; index++)
     {
        pthread_join(threads[index],NULL); 
-       free(thread_args[index]);
     }
     adestroy( shared );
-    pthread_exit(NULL);
-    free(threads);
+    //pthread_exit(NULL);
+    //free(threads);
 }

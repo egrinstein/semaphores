@@ -1,5 +1,6 @@
 #include "channel.h"
 #include <pthread.h>
+#include <stdio.h>
 #include <semaphore.h>
 
 struct synch {
@@ -19,9 +20,16 @@ struct asynch {
 };
 void* asynch_inspect(asynch_t* h, int type){
     if(type == 0) return h->buffer;
-    if(type == 1) return h->capacity;
-    if(type == 2) return h->messages;
+    if(type == 1) return (void*)h->capacity;
+    if(type == 2) return (void*)h->messages;
     if(type == 3) return h->write_sem;
+    if(type == 4) 
+    {
+        int i = 0;
+        printf("buffer %p:\n",h);
+        for(;i<=h->messages;i++)
+            printf("%d\n",h->buffer[i]);
+    }
 }
 asynch_t* create_new_a(asynch_t* h, int capacity){
     h = malloc(sizeof(asynch_t));
@@ -41,8 +49,9 @@ asynch_t* create_new_a(asynch_t* h, int capacity){
 int asend(asynch_t* h, int* mess){
     sem_wait( h->write_sem );
     pthread_mutex_lock( h->buffer_lock );
-    h->buffer[h->messages] = *mess;
     h->messages++;
+    h->buffer[h->messages] = *mess;
+    //asynch_inspect(h,4);
     pthread_mutex_unlock( h->buffer_lock );
     sem_post(h->read_sem);
     
@@ -53,6 +62,7 @@ int arecv(asynch_t* h, int* mess){
     pthread_mutex_lock( h->buffer_lock );	
     *mess = h->buffer[h->messages];
     h->messages--;
+    //asynch_inspect(h,4);
     pthread_mutex_unlock( h->buffer_lock );
     sem_post(h->write_sem);
 }
