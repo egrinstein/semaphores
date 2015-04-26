@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include <stdio.h>
 
-#define BUFF_SIZE   5		
+#define BUFF_SIZE   50		
 #define PRODS       1		
 #define CONS        1		
 #define N           1	/* Quanto cada produtor produz 
@@ -42,7 +42,9 @@ void *Consumer(void *arg)
 {
     int i,item, index ;
 
+    printf("cp = %p\n\n",(void*)arg);
     args* a = arg;
+    printf("cp == %p\n\n",(void*)a);
     index = a->item;
     printf("criada thread consumidora %d\n",index);
     for (i=0; i < N; i++) {
@@ -54,7 +56,7 @@ void *Consumer(void *arg)
 
 int main()
 {
-    pthread_t idProd, idCons;
+    pthread_t *threads = (pthread_t*)malloc((PRODS+CONS)*sizeof(pthread_t));
     int index;
     asynch_t * shared ; 
     shared = create_new_a(shared,BUFF_SIZE);
@@ -65,16 +67,20 @@ int main()
        arg->item = index;
        arg->shared = shared;
        printf("ct %p\n",arg);
-       pthread_create(&idProd, NULL, Producer, arg);
+       pthread_create(&threads[index], NULL, Producer, arg);
     }
-    
     for (index = 0; index < CONS; index++)
     {  
        args* arg = malloc(sizeof(args)); 
        arg->item = index;
-       pthread_create(&idCons, NULL, Consumer, &arg);
+       arg->shared = shared;
+       printf("cp %p\n",arg);
+       pthread_create(&threads[index+PRODS], NULL, Consumer, arg);
     }
-
+    for (index = 0; index < PRODS+CONS; index++)
+    {
+       pthread_join(threads[index],NULL); 
+    }
     adestroy( shared );
     pthread_exit(NULL);
 }
