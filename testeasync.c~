@@ -21,7 +21,7 @@ void *Producer(void* arg)
     args* a = arg;
     //printf("ct == %p\n\n",(void*)a);
     index = a->item; 
-    //printf("criada thread produtora %d\n",index);
+    printf("criada thread produtora %d\n",index);
     for (i=0; i < N; i++) {
 
         /* Produz item */
