@@ -57,16 +57,17 @@ void *Consumer(void *arg)
 int main()
 {
     pthread_t *threads = (pthread_t*)malloc((PRODS+CONS)*sizeof(pthread_t));
+    args **thread_args = malloc((PRODS+CONS)*sizeof(args *));
     int index;
     asynch_t * shared ; 
     shared = create_new_a(shared,BUFF_SIZE);
-    printf("criado canal:\n%d\n",asynch_inspect(shared,2));
+    printf("criado canal:%d\n",asynch_inspect(shared,2));
     for (index = 0; index < PRODS; index++)
     {  
        args* arg = malloc(sizeof(args)); 
        arg->item = index;
        arg->shared = shared;
-       //printf("ct %p\n",arg);
+       thread_args[index] = arg ;
        pthread_create(&threads[index], NULL, Producer, arg);
     }
     for (index = 0; index < CONS; index++)
@@ -74,13 +75,15 @@ int main()
        args* arg = malloc(sizeof(args)); 
        arg->item = index;
        arg->shared = shared;
-       //printf("cp %p\n",arg);
+       thread_args[index+PRODS] = arg ;
        pthread_create(&threads[index+PRODS], NULL, Consumer, arg);
     }
     for (index = 0; index < PRODS+CONS; index++)
     {
        pthread_join(threads[index],NULL); 
+       free(thread_args[index]);
     }
     adestroy( shared );
     pthread_exit(NULL);
+    free(threads);
 }
