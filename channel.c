@@ -8,48 +8,46 @@ struct synch {
 };
 
 struct asynch {
-    int *buffer;
+    int* buffer;
     int capacity;
-    pthread_mutex_t buffer_lock;
-    sem_t write_lock;
-		/* Bloqueia se o buffer está cheio */
-    sem_t read_lock;
-		/* Bloqueia se o buffer está vazio */
-
+    int messages;
+    sem_t* sem;
 };
-
+void* asynch_inspect(asynch_t* h, int type){
+    if(type == 0) return h->buffer;
+    if(type == 1) return h->capacity;
+    if(type == 2) return h->messages;
+    if(type == 3) return h->sem;
+}
 asynch_t* create_new_a(asynch_t* h, int capacity){
     h = malloc(sizeof(asynch_t));
     h->buffer = malloc(sizeof(int)*capacity);
     h->capacity = capacity ;
-    sem_init( &(h->write_lock) ,0,capacity);
-    sem_init( &(h->read_lock) ,0,0);
-    pthread_mutex_init( &(h->buffer_lock), 0 );
+    h->messages = 0 ;
+    h->sem = malloc(sizeof(sem_t));
+    sem_init( h->sem ,0,capacity);
     return h; 
 }
 
 int asend(asynch_t* h, int* mess){
     int val ;
-	sem_wait( &(h->write_lock) );
-	pthread_mutex_lock( &(h->buffer_lock) );
-    
-        sem_getvalue( &(h->write_lock), &val);
+    printf("s %p\n",h);
+    val = h->messages;
+    printf("asend %d\n",val);
+    if(val <= h->capacity){
         h->buffer[val] = *mess;
-
-	pthread_mutex_unlock( &(h->buffer_lock) );
-	sem_post(&(h->read_lock));
+    }
+    h->messages++;
+	sem_post(h->sem);
 }
 
 int arecv(asynch_t* h, int* mess){
     int val;
-    sem_wait(&(h->read_lock));
-    pthread_mutex_lock( &(h->buffer_lock) );
- 	
-    sem_getvalue( &(h->read_lock), &val);
+    printf("r\n");
+    sem_wait(h->sem);	
+    val = --h->messages;
+    printf("arecv %d => %d\n",val,h->buffer[val]);
     *mess = h->buffer[val];
-
-    pthread_mutex_unlock( &(h->buffer_lock) );
-    sem_post( &(h->write_lock) );
 }
 
 synch_t* create_new_s(synch_t* h){
@@ -76,9 +74,7 @@ void destroy(synch_t* h){
     free(h);
 }
 void adestroy(asynch_t* h){
-    sem_destroy(&(h->write_lock));
-    sem_destroy(&(h->read_lock));
-    pthread_mutex_destroy(&(h->buffer_lock));
+    sem_destroy(h->sem);
     free(h->buffer);
     free(h);
 }
