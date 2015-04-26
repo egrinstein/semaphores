@@ -57,29 +57,32 @@ void *Consumer(void *arg)
 int main()
 {
     pthread_t* threads = (pthread_t*)malloc((PRODS+CONS)*sizeof(pthread_t));
+    args* thread_args[PRODS+CONS];
+       
     int index;
     asynch_t * shared ; 
     shared = create_new_a(shared,BUFF_SIZE);
     printf("criado canal:%d\n",asynch_inspect(shared,2));
     for (index = 0; index < PRODS; index++)
     {  
-       args* arg = malloc(sizeof(args)); 
-       arg->item = index;
-       arg->shared = shared;
-       pthread_create(&threads[index], NULL, Producer, arg);
+       thread_args[index] = malloc(sizeof(args)); 
+       thread_args[index]->item = index;
+       thread_args[index]->shared = shared;
+       pthread_create(&threads[index], NULL, Producer, thread_args[index]);
     }
     for (index = 0; index < CONS; index++)
     {  
-       args* arg = malloc(sizeof(args)); 
-       arg->item = index;
-       arg->shared = shared;
-       pthread_create(&threads[index+PRODS], NULL, Consumer, arg);
+       thread_args[index+PRODS] = malloc(sizeof(args)); 
+       thread_args[index+PRODS]->item = index;
+       thread_args[index+PRODS]->shared = shared;
+       pthread_create(&threads[index+PRODS], NULL, Consumer, thread_args[index]);
     }
     for (index = 0; index < PRODS+CONS; index++)
     {
        pthread_join(threads[index],NULL); 
+       free(thread_args[index]);
     }
     adestroy( shared );
-    //pthread_exit(NULL);
-    //free(threads);
+    pthread_exit(NULL);
+    free(threads);
 }
