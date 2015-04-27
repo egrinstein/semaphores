@@ -23,18 +23,3 @@ Realizamos testes com números diferentes de produtores e consumidores.
 O constatado é que o teste não finaliza, visto que ou um consumidor fica "esperando"
 para consumir (porém os produtores já produziram tudo) ou vice versa.
 
-
-Algumas considerações de implementação
-======================================
-
-Foram implementados dois mutexes para o canal síncrono.
-Para enviar uma mensagem, o mutex 'write' deve estar destravado.
-Ao terminar de enviar a mensagem, o mutex 'read' é destravado, sinalizando
-que o buffer pode ser consumido. 
-Para a leitura de mensagens, os mutexes devem estar na posição inversa do envio,
-explicado acima.
-
-A implementação é similar no buffer assíncrono, porém há 2 semáforos 
-
-
-
