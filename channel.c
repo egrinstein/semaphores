@@ -18,7 +18,7 @@ struct asynch {
     sem_t* read_sem;
 	/* Regula a leitura no buffer */
 };
-void* static asynch_inspect(asynch_t* h, int type){
+static void* asynch_inspect(asynch_t* h, int type){
     if(type == 0) return h->buffer;
     if(type == 1) return (void*)h->capacity;
     if(type == 2) return (void*)h->messages;
@@ -71,7 +71,7 @@ int arecv(asynch_t* h, int* mess){
 
 synch_t* create_new_s(synch_t* h){
     h = malloc(sizeof(synch_t));
-    h->buffer = malloc(sizeof(pthread_mutex_t));
+    h->lock = malloc(sizeof(pthread_mutex_t));
     h->buffer = 0;
     pthread_mutex_init(h->lock,NULL);
     return h; 
