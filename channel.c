@@ -5,7 +5,9 @@
 
 struct synch {
     int buffer;
-    pthread_mutex_t * lock;
+    pthread_mutex_t * write;
+    pthread_mutex_t * read;
+
 };
 
 struct asynch {
@@ -71,27 +73,30 @@ int arecv(asynch_t* h, int* mess){
 
 synch_t* create_new_s(synch_t* h){
     h = malloc(sizeof(synch_t));
-    h->lock = malloc(sizeof(pthread_mutex_t));
+    h->write = malloc(sizeof(pthread_mutex_t));
+    h->read = malloc(sizeof(pthread_mutex_t));
     h->buffer = 0;
-    pthread_mutex_init(h->lock,NULL);
+    pthread_mutex_init(h->write,NULL);
     return h; 
 }
 
 int send(synch_t* h, int* mess){
-    pthread_mutex_lock(h->lock);
+    pthread_mutex_lock(h->write);
     h->buffer = *mess;
-    pthread_mutex_unlock(h->lock);
+    pthread_mutex_unlock(h->read);
 }
 
 int recv(synch_t* h, int* mess){
-    pthread_mutex_lock(h->lock);
+    pthread_mutex_lock(h->read);
     *mess = h->buffer;
-    pthread_mutex_unlock(h->lock);
+    pthread_mutex_unlock(h->write);
 }
 
 void destroy(synch_t* h){
-    pthread_mutex_destroy(h->lock);
-    free(h->lock);
+    pthread_mutex_destroy(h->write);
+    pthread_mutex_destroy(h->read);
+    free(h->write);
+    free(h->read);  
     free(h);
 }
 void adestroy(asynch_t* h){

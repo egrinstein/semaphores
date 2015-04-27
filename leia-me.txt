@@ -1,0 +1,16 @@
+=========================
+COMUNICAÇÃO ENTRE THREADS
+=========================
+	Autores: Eric Grinstein - 1310428
+		 Leonardo Kaplan - 121****
+
+
+Testes Realizados
+=================
+
+Tanto para a comunicação síncrona quanto para a assíncrona, foram realizados 3 testes:
+1.Número de consumidores > Produtores
+2.Número de consumidores < Produtores
+3.Número de consumidores = Produtores
+
+1. execute o arquivo build.sh
