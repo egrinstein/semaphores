@@ -24,7 +24,8 @@ void* static asynch_inspect(asynch_t* h, int type){
     if(type == 2) return (void*)h->messages;
     if(type == 3) return h->write_sem;
     if(type == 4) return h->read_sem;
-    if(type == 5) return h->buffer_lock;   
+    if(type == 5) return h->buffer_lock;
+    
     if(type == 6) 
     {
         int i = 0;

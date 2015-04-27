@@ -17,27 +17,25 @@ typedef struct {
     int item;
     synch_t * shared ; 
 } args;
-	/* Canal compartilhado */
+	
 
 void *Producer(void* arg)
 {
     int i, item , index;
-    //printf("ct = %p\n\n",(void*)arg);
+    
     args* a = arg;
-    //printf("ct == %p\n\n",(void*)a);
+    
     index = a->item; 
-    //printf("criada thread produtora %d\n",index);
+ 
     for (i=0; i < N; i++) {
 
         /* Produz item */
         item = i;	
-	
-	//printf("[P%d] Produzindo %d ...\n", index, item); 
-        //printf("%p\t%d\n",a->shared,asynch_inspect(a->shared,2));  
+
         send( a->shared , &item );  
 	printf("[P%d] Produziu %d ...\n", index, item); 
 
-        /* Interleave  producer and consumer execution */
+        /* Intercalar produtores e consumidores */
         if (i % 2 == 1) sleep(1);
     }
     return NULL;
@@ -47,14 +45,15 @@ void *Consumer(void *arg)
 {
     int i,item, index ;
 
-    //printf("cp = %p\n\n",(void*)arg);
+   
     args* a = arg;
-    //printf("cp == %p\n\n",(void*)a);
+  
     index = a->item;
-    //printf("criada thread consumidora %d\n",index);
+    
     for (i=0; i < N; i++) {
+	/* Consome Buffer */
         recv( a->shared , &item );  
-	    printf("=====>[C%d] Consumiu %d ...\n", index, item); 
+	printf("=====>[C%d] Consumiu %d ...\n", index, item); 
     }
     return NULL;
 }
@@ -69,18 +68,23 @@ int main()
     shared = create_new_s(shared);
     for (index = 0; index < PRODS; index++)
     {  
-       thread_args[index] = malloc(sizeof(args)); 
+       thread_args[index] = (args*)malloc(sizeof(args)); 
        thread_args[index]->item = index;
        thread_args[index]->shared = shared;
+		/* Cria um novo argumento a ser passado para a thread */
+
        pthread_create(&threads[index], NULL, Producer, thread_args[index]);
     }
     for (index = 0; index < CONS; index++)
     {  
-       thread_args[index+PRODS] = malloc(sizeof(args)); 
+       thread_args[index+PRODS] = malloc(sizeof(args));
        thread_args[index+PRODS]->item = index;
        thread_args[index+PRODS]->shared = shared;
+		/* Cria um novo argumento a ser passado para a thread */
+
        pthread_create(&threads[index+PRODS], NULL, Consumer, thread_args[index]);
     }
+   
     for (index = 0; index < PRODS+CONS; index++)
     {
        pthread_join(threads[index],NULL); 

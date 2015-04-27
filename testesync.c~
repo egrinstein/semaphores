@@ -1,10 +1,8 @@
+
 #include "channel.h"
 #include <pthread.h>
 #include <stdio.h>
 
-#ifndef BUFF_SIZE
-#define BUFF_SIZE   50		
-#endif
 #ifndef PRODS
 #define PRODS       3		
 #endif
@@ -14,28 +12,30 @@
 #ifndef N 
 #define N           4	/* Quanto cada produtor produz (e cada consumidor consome)*/	
 #endif
+
 typedef struct {
     int item;
-    asynch_t * shared ; 
+    synch_t * shared ; 
 } args;
 	
+
 void *Producer(void* arg)
 {
     int i, item , index;
     
     args* a = arg;
-   
+    
     index = a->item; 
-
+ 
     for (i=0; i < N; i++) {
 
         /* Produz item */
         item = i;	
-	 
-        asend( a->shared , &item );  
+
+        send( a->shared , &item );  
 	printf("[P%d] Produziu %d ...\n", index, item); 
 
-        /* Intercala execução do produtor e consumidor */
+        /* Intercalar produtores e consumidores */
         if (i % 2 == 1) sleep(1);
     }
     return NULL;
@@ -45,15 +45,14 @@ void *Consumer(void *arg)
 {
     int i,item, index ;
 
- 
+   
     args* a = arg;
-    
+  
     index = a->item;
-
+    
     for (i=0; i < N; i++) {
-	/* consome buffer */
-        arecv( a->shared , &item );  
-	    printf("=====>[C%d] Consumiu %d ...\n", index, item); 
+        recv( a->shared , &item );  
+	printf("=====>[C%d] Consumiu %d ...\n", index, item); 
     }
     return NULL;
 }
@@ -64,9 +63,8 @@ int main()
     args* thread_args[PRODS+CONS];
        
     int index;
-    asynch_t * shared ; 
-    shared = create_new_a(shared,BUFF_SIZE);
-
+    synch_t * shared ; 
+    shared = create_new_s(shared);
     for (index = 0; index < PRODS; index++)
     {  
        thread_args[index] = malloc(sizeof(args)); 
@@ -86,7 +84,7 @@ int main()
        pthread_join(threads[index],NULL); 
        free(thread_args[index]);
     }
-    adestroy( shared );
+    destroy( shared );
     pthread_exit(NULL);
     free(threads);
 }
