@@ -2,12 +2,18 @@
 #include <pthread.h>
 #include <stdio.h>
 
+#ifndef BUFF_SIZE
 #define BUFF_SIZE   50		
+#endif
+#ifndef PRODS
 #define PRODS       3		
+#endif
+#ifndef CONS
 #define CONS        3		
-#define N           4	/* Quanto cada produtor produz 
-			(e cada consumidor consome)*/	
-
+#endif
+#ifndef N 
+#define N           4	/* Quanto cada produtor produz (e cada consumidor consome)*/	
+#endif
 typedef struct {
     int item;
     asynch_t * shared ; 
