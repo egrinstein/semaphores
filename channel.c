@@ -77,6 +77,8 @@ synch_t* create_new_s(synch_t* h){
     h->read = malloc(sizeof(pthread_mutex_t));
     h->buffer = 0;
     pthread_mutex_init(h->write,NULL);
+    pthread_mutex_init(h->read,NULL);
+    pthread_mutex_lock(h->read);
     return h; 
 }
 
